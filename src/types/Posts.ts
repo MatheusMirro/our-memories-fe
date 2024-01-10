@@ -4,4 +4,5 @@ export type Posts = {
   fileType?: string;
   fileSize?: string;
   uploadDate?: Date;
+  fileData?: string;
 };

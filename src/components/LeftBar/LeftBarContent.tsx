@@ -13,31 +13,84 @@ import {
 } from "./style";
 import { Avatar, Badge } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
-import LunchDiningIcon from "@mui/icons-material/LunchDining";
 import SendIcon from "@mui/icons-material/Send";
 import NotificationsNoneIcon from "@mui/icons-material/NotificationsNone";
 import SettingsIcon from "@mui/icons-material/Settings";
 import HomeIcon from "@mui/icons-material/Home";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import CategoryIcon from "@mui/icons-material/Category";
 
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../contexts/Auth/AuthContext";
+import { User } from "../../types/User";
+import { ProfilePicture } from "../../types/ProfilePicture";
+import { useNavigate } from "react-router-dom";
 
 const LeftBarContent = () => {
-  const auth = useContext(AuthContext);
+  const [userData, setUserData] = useState<User | null>(null);
+  const [profilePicture, setProfilePicture] = useState<ProfilePicture | null>(
+    null
+  );
 
+  const auth = useContext(AuthContext);
+  const ownUser = auth.user?.user;
+
+  const navigate = useNavigate();
+
+  const home = () => {
+    navigate("/");
+    window.location.reload();
+  };
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/users/${ownUser}`
+        );
+        const data = await response.json();
+        setUserData(data);
+      } catch (error) {
+        console.error("Erro ao obter dados do usuário:", error);
+      }
+    };
+
+    const fetchProfilePicture = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/api/profile-picture/${ownUser}`
+        );
+        const data = await response.json();
+
+        if (data && data.length > 0 && data[0].fileData) {
+          setProfilePicture(data[0].fileData);
+        } else {
+          console.error(
+            "Dados de imagem inválidos ou ausentes na resposta da API."
+          );
+        }
+      } catch (error) {
+        console.error("Erro ao obter a imagem de perfil:", error);
+      }
+    };
+
+    fetchUserData();
+    fetchProfilePicture();
+  }, [ownUser]);
   return (
     <div>
       <GridWrapper>
         <Item1>
           <HeaderItems>
-            <LunchDiningIcon style={{ color: "black" }} />
-            <p>Bom dia</p>
+            <CategoryIcon style={{ color: "black" }} />
+            <p onClick={home} style={{ cursor: "pointer" }}>
+              Our Memories
+            </p>
           </HeaderItems>
           <AvatarImg>
             <Avatar
               alt="Mirro"
-              src="src\assets\matheus.jpg"
+              src={`data:image/png;base64,${profilePicture}`}
               sx={{
                 height: 80,
                 width: 80,
@@ -53,7 +106,7 @@ const LeftBarContent = () => {
           <SocialCounter>
             <PostCounter>
               <P>Post</P>
-              <P>10</P>
+              <P>{userData?.postCount}</P>
             </PostCounter>
 
             <FollowersCounter>
@@ -78,7 +131,7 @@ const LeftBarContent = () => {
             </Badge>
             <SettingsIcon style={{ color: "black" }} />
 
-            <AccountCircleIcon style={{ color: "black" }}/>
+            <AccountCircleIcon style={{ color: "black" }} />
           </Icons>
         </Item1>
       </GridWrapper>

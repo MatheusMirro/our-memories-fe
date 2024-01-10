@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useApi } from "../../api/useApi";
 import { User } from "../../types/User";
 import { AuthContext } from "./AuthContext";
@@ -6,7 +6,6 @@ import { AuthContext } from "./AuthContext";
 export const AuthProvider = ({ children }: { children: JSX.Element }) => {
   const [user, setUser] = useState<User | null>(null);
   const api = useApi();
-  const auth = useContext(AuthContext);
 
   useEffect(() => {
     const validateToken = async () => {
@@ -62,22 +61,15 @@ export const AuthProvider = ({ children }: { children: JSX.Element }) => {
     return false;
   };
 
-  const profile = async () => {
+  const profile = async (username: string) => {
     try {
-      const username = auth.user?.user;
-  
-      if (username) { // Verifica se username não é undefined
-        const response = await api.profile(username);
-        return response;
-      } else {
-        throw new Error("Nome de usuário inválido");
-      }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error:any) {
-      throw new Error(error.response.data);
+      const response = await api.profile(username);
+      return response;
+    } catch (error) {
+      console.error("Erro ao buscar posts:", error);
+      throw error;
     }
   };
-  
 
   return (
     <AuthContext.Provider value={{ user, signin, signup, profile }}>

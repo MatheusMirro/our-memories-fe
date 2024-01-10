@@ -5,6 +5,7 @@ import Signup from "./pages/Signup";
 import Hero from "./pages/Hero/Hero";
 import { RequireAuth } from "./contexts/Auth/RequireAuth";
 import { useState } from "react";
+import EditProfile from "./components/Profile/Profile";
 
 function App() {
   const [isLoggedIn] = useState(false);
@@ -21,9 +22,10 @@ function App() {
       <Route
         path="/:username"
         element={
-          <RequireAuth>{isLoggedIn ? <Hero /> : <Signin />}</RequireAuth>
+          <RequireAuth>{isLoggedIn ? <EditProfile /> : <Signin />}</RequireAuth>
         }
       />
+
       <Route path="/register" element={<Signup />} />
     </Routes>
   );
